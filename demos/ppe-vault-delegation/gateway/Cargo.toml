@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Praxis Contributors
+
+[package]
+name = "ppe-vault-demo-gateway"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "ppe-vault-demo-gateway"
+path = "src/main.rs"
+
+[dependencies]
+praxis-ai-proxy = { git = "https://github.com/praxis-proxy/ai", rev = "66d45b47a1e9b60c51bd592b4022bf520862ea25", features = ["praxis-main"] }
+praxis-proxy-filter = { version = "0.7.3", features = ["policy-engine", "chain-binding"] }
+praxis-proxy-protocol = { version = "0.7.3", features = ["admin-api"] }
+clap = { version = "4", features = ["derive"] }
+tracing = "0.1"
+
+[target.'cfg(unix)'.dependencies]
+tikv-jemallocator = "0.7"
+
+# PR #168 is not released yet. build-gateway.sh resolves gateway/.policy to a
+# checkout carrying that PR; this patch makes praxis's policy filter use it.
+[patch.crates-io]
+praxis-policy = { path = ".policy/crates/ppe" }
