@@ -15,6 +15,11 @@ docker compose version >/dev/null
 mkdir -p .state
 chmod 700 .state
 
+if [ -s .state/gateway.pid ] && kill -0 "$(<.state/gateway.pid)" 2>/dev/null; then
+  echo "gateway is already running; run ./down.sh first" >&2
+  exit 1
+fi
+
 docker compose up -d --build
 for service in vault github-bridge; do
   deadline="$(( $(date +%s) + 60 ))"
@@ -33,10 +38,6 @@ done
 ./vault/setup.sh
 
 gateway="$(./build-gateway.sh)"
-if [ -s .state/gateway.pid ] && kill -0 "$(<.state/gateway.pid)" 2>/dev/null; then
-  echo "gateway is already running; run ./down.sh first" >&2
-  exit 1
-fi
 nohup "$gateway" -c "$DEMO_DIR/praxis.yaml" >.state/gateway.log 2>&1 &
 printf '%s\n' "$!" >.state/gateway.pid
 

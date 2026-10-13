@@ -65,8 +65,16 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json(400, {"error": "invalid JSON"})
             return
 
+        if not isinstance(message, dict):
+            self._send_json(400, {"error": "invalid request"})
+            return
+
+        params = message.get("params")
+        if not isinstance(params, dict):
+            self._send_json(400, {"error": "invalid request"})
+            return
+
         request_id = message.get("id")
-        params = message.get("params") or {}
         if message.get("method") != "tools/call" or params.get("name") != "github_whoami":
             self._send_json(
                 200,

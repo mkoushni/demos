@@ -11,8 +11,11 @@ use tracing::info;
 #[derive(Parser)]
 #[command(name = "ppe-vault-demo-gateway")]
 struct Cli {
-    /// Path to the Praxis YAML configuration.
-    #[arg(short = 'c', long = "config")]
+    #[arg(
+        short = 'c',
+        long = "config",
+        help = "Path to the Praxis YAML configuration."
+    )]
     config: Option<String>,
 }
 

@@ -33,6 +33,9 @@ esac
 
 [ -n "$token" ] || { echo "empty GitHub token" >&2; exit 1; }
 
+mkdir -p "$DEMO_DIR/.state"
+chmod 700 "$DEMO_DIR/.state"
+
 expected_login="$(
   printf '%s' "$token" \
     | GITHUB_API_BASE="$GITHUB_API_BASE" python3 "$DEMO_DIR/scripts/github-login.py"

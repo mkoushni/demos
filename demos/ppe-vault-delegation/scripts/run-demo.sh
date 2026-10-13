@@ -71,15 +71,18 @@ github_after="$(curl -fsS http://127.0.0.1:9100/stats | jq -er '.github_calls')"
 [ "$github_before" = "$github_after" ] || { echo "unenrolled user contacted GitHub" >&2; exit 1; }
 
 echo "[3/3] policy deny: no Vault or GitHub dependency call"
-vault_before="$(docker compose -f "$DEMO_DIR/docker-compose.yml" logs --no-color vault 2>/dev/null | grep -c '"type":"request"' || true)"
+vault_since="$(date -u +%Y-%m-%dT%H:%M:%S.%NZ)"
 github_before="$(curl -fsS http://127.0.0.1:9100/stats | jq -er '.github_calls')"
 deny_response="$(call_tool alice github_denied || true)"
 assert_token_absent "policy-denied response" "$deny_response"
 printf '%s\n' "$deny_response" | jq .
 printf '%s' "$deny_response" | grep -Fq 'demo.policy_denied'
-vault_after="$(docker compose -f "$DEMO_DIR/docker-compose.yml" logs --no-color vault 2>/dev/null | grep -c '"type":"request"' || true)"
+vault_requests="$(
+  docker compose -f "$DEMO_DIR/docker-compose.yml" logs --no-color --since "$vault_since" vault \
+    | awk '/"type":"request"/ { count++ } END { print count + 0 }'
+)"
 github_after="$(curl -fsS http://127.0.0.1:9100/stats | jq -er '.github_calls')"
-[ "$vault_before" = "$vault_after" ] || { echo "policy deny contacted Vault" >&2; exit 1; }
+[ "$vault_requests" -eq 0 ] || { echo "policy deny contacted Vault" >&2; exit 1; }
 [ "$github_before" = "$github_after" ] || { echo "policy deny contacted GitHub" >&2; exit 1; }
 
 echo "[security] token is absent from outputs and local artifacts"

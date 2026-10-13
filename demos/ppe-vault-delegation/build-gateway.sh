@@ -29,6 +29,7 @@ else
     git -C "$PPE_CHECKOUT" checkout --quiet --detach FETCH_HEAD
   else
     git clone --quiet "$PPE_GIT_URL" "$PPE_CHECKOUT"
+    git -C "$PPE_CHECKOUT" fetch --quiet origin "$PPE_GIT_REF"
     git -C "$PPE_CHECKOUT" checkout --quiet --detach "$PPE_GIT_REF"
   fi
   ln -sfn "$PPE_CHECKOUT" "$PPE_LINK"
