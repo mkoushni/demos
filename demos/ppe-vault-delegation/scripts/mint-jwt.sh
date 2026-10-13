@@ -21,8 +21,8 @@ private_key="$state/demo-private.pem"
 public_key="$state/demo-public.pem"
 if [ ! -s "$private_key" ]; then
   openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out "$private_key" >/dev/null 2>&1
-fi
-if [ ! -s "$public_key" ]; then
+  openssl pkey -in "$private_key" -pubout -out "$public_key" >/dev/null 2>&1
+elif [ ! -s "$public_key" ]; then
   openssl pkey -in "$private_key" -pubout -out "$public_key" >/dev/null 2>&1
 fi
 
