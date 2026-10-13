@@ -24,9 +24,11 @@ Vault deployment.
 - The bridge never logs or serializes `Authorization` and returns only GitHub
   `login`, numeric `id`, and `html_url`.
 
-Use a fine-grained GitHub personal access token with the smallest repository
-scope and read-only permissions practical for your test. GitHub's `/user`
-endpoint accepts `Authorization: Bearer <token>`.
+Use a fine-grained GitHub personal access token with **no repository access and
+no additional permissions**. GitHub's `GET /user` endpoint does not require a
+fine-grained permission; the token only needs to identify its owner. A classic
+personal access token with no scopes also works, but a fine-grained token is
+preferred. The endpoint accepts `Authorization: Bearer <token>`.
 
 > Vault runs here in insecure, in-memory developer mode with a known root token
 > and loopback HTTP. The RSA signing key is generated locally under `.state/`.
@@ -36,7 +38,7 @@ endpoint accepts `Authorization: Bearer <token>`.
 
 - Docker with Compose v2
 - Rust 1.96 (`rustup toolchain install 1.96.0`) and Cargo
-- `curl`, `git`, `jq`, and `openssl`
+- `curl`, `git`, `jq`, `openssl`, and Python 3
 - Optional: GitHub CLI (`gh`) already authenticated
 - Loopback ports `8090`, `8200`, and `9100` available
 
@@ -68,6 +70,18 @@ The scenario runner proves three outcomes:
    `delegation.vault_secret_not_found` and the bridge is not called.
 3. `github_denied` is rejected before `delegate(...)`; Vault audit-request and
    bridge-call counters do not change.
+
+It also reads Alice's credential back through the local demo root token solely
+as a test oracle. The value stays in shell memory and is used to assert that it
+is absent from every response, service log, generated state file, and tracked
+demo file. It is never printed or placed in a process argument.
+
+## Cleanup
+
+Run `./down.sh` to stop the gateway and containers, remove the Compose volumes,
+and delete `.state/`, including generated keys, JWTs, policy, logs, and the
+recorded expected login. This does not revoke the GitHub token itself; revoke
+the token in GitHub when the demo is finished.
 
 ## What `up.sh` configures
 

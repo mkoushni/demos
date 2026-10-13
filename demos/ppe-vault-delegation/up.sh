@@ -7,7 +7,7 @@ set -euo pipefail
 DEMO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$DEMO_DIR"
 
-for command in cargo curl docker git jq openssl rustup; do
+for command in cargo curl docker git jq openssl python3 rustup; do
   command -v "$command" >/dev/null || { echo "missing required command: $command" >&2; exit 1; }
 done
 docker compose version >/dev/null

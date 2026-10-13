@@ -8,6 +8,8 @@ subject="${1:-alice}"
 source_mode="${2:-prompt}"
 VAULT_ADDR="${VAULT_ADDR:-http://127.0.0.1:8200}"
 VAULT_TOKEN="${VAULT_TOKEN:-demo-root}"
+GITHUB_API_BASE="${GITHUB_API_BASE:-https://api.github.com}"
+DEMO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 case "$subject" in
   alice|bob) ;;
@@ -31,6 +33,11 @@ esac
 
 [ -n "$token" ] || { echo "empty GitHub token" >&2; exit 1; }
 
+expected_login="$(
+  printf '%s' "$token" \
+    | GITHUB_API_BASE="$GITHUB_API_BASE" python3 "$DEMO_DIR/scripts/github-login.py"
+)"
+
 response="$(
   printf '%s' "$token" \
     | jq -Rs '{data:{token:.}}' \
@@ -43,4 +50,6 @@ response="$(
 unset token
 
 version="$(printf '%s' "$response" | jq -er '.data.version')"
+printf '%s\n' "$expected_login" >"$DEMO_DIR/.state/$subject.expected-github-login"
+chmod 600 "$DEMO_DIR/.state/$subject.expected-github-login"
 printf 'enrolled GitHub credential for %s (Vault version %s)\n' "$subject" "$version"
