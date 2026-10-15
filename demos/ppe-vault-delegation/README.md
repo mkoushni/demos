@@ -104,22 +104,6 @@ the token in GitHub when the demo is finished.
 The enrollment logical path is `secret/agents/<sub>/github`; because `secret/`
 is KV v2, the corresponding ACL path contains the additional `data/` segment.
 
-## PR #168 dependency
-
-The demo is tracked by
-[`praxis-proxy/policy#192`](https://github.com/praxis-proxy/policy/issues/192)
-and blocked by
-[`praxis-proxy/policy#168`](https://github.com/praxis-proxy/policy/pull/168).
-Until the Vault delegator ships, `build-gateway.sh` pins the reviewed PR branch
-commit from the contributor fork. Set `PPE_DIR` to test another local checkout:
-
-```console
-PPE_DIR=/path/to/policy ./up.sh
-```
-
-After #168 ships, replace the temporary commit pin with the matching PPE release
-and keep the Praxis/PPE dependency graph on one version.
-
 ## Production adaptation
 
 - Replace Vault dev mode with persistent storage, TLS, normal unseal and root
